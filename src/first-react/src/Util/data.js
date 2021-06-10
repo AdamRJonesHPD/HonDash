@@ -37,6 +37,7 @@ ws.onmessage = function(event) {
       }
     }
   }
+  console.log(data);
 };
 
 // asks for the setup as soon as possible

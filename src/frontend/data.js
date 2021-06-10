@@ -46,8 +46,8 @@ ws.onopen = function(e) {
 
 // in case something blows up or connection gets close, keep trying
 ws.onerror = function(e) {
-  location.reload();
+  window.location.reload();
 };
 ws.onclose = function(e) {
-  location.reload();
+  window.location.reload();
 };

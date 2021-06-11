@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom';
 import './index.css';
 import App from './Components/App/App';
 import reportWebVitals from './reportWebVitals';
-import Data from './Util/data';
+//import Data from './Util/data';
 
 ReactDOM.render(
   <React.StrictMode>

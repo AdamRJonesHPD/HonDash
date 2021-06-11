@@ -1,8 +1,74 @@
 import logo from './logo.svg';
 import './App.css';
-//import Data from '../../Util/data';
+import React,{ useEffect } from 'react';
 
 function App() {
+	useEffect(() => {
+    var setup = undefined;
+    var ws = new WebSocket(
+      "ws://" + (window.location.hostname || "127.0.0.1") + ":5678/"
+    );
+
+    // asks for the setup as soon as possible
+    ws.onopen = (e) => {
+      console.log('Websocket Client Connected');
+      ws.send(JSON.stringify({ action: "setup" }));
+    };
+
+    // in case something blows up or connection gets close, keep trying
+    ws.onclose = (e) => {
+      console.log('Websocket Closed');
+      window.location.reload();
+    };
+    ws.onerror = (e) => {
+      console.log('Websocket Error');
+      window.location.reload();
+    };
+
+    ws.onmessage = function(event) {
+      var data = JSON.parse(event.data);
+      var keys = Object.keys(data);
+
+      // if the setup has not been received
+      if (setup === undefined) {
+        if (keys[0] === "setup") {
+          setup = data["setup"];
+          for (var value in setup) {
+            for (var option in setup[value]) {
+              var method = "set" + option.charAt(0).toUpperCase() + option.slice(1);
+              try {
+                window[setup[value]["tag"]][method](setup[value][option]);
+              } catch (e) {
+              // probably it´s not a field for setting up something in the frontend so we can skip it
+              }
+            }
+          }
+        }
+      } else {
+        if (keys[0] === "data") {
+          for (var key in data["data"]) {
+            // for all values
+            try {
+              // if it's associated to a frontend tag
+              window[setup[key]["tag"]]["refresh"](data["data"][key]);
+              console.log(key);
+            } catch (e) {}
+          }
+        } else if (keys[0] === "action") {
+          if (data["action"] === "refresh") {
+            window.location.replace("index.html");
+          }
+        }
+      }
+      console.log(data);
+    };
+    
+    //effect cleanup function
+    return (data) => {
+      ws = null;
+    };
+  }, []);
+
   return (
     <div className="App">
       <header className="App-header">
@@ -10,6 +76,7 @@ function App() {
         <p>
           Edit <code>src/App.js</code> and save to reload.
         </p>
+        <p>{'data should show up here'}</p>
         <a
           className="App-link"
           href="https://reactjs.org"
